@@ -154,7 +154,7 @@ function CardViewer() {
           >
             {card.treats.map((treat: string, index: number) => (
               <span
-                key={index}
+                key={`${treat}-${index}`}
                 style={{
                   fontSize: "32px",
                   animation: `bounce ${0.5 + index * 0.1}s ease-in-out infinite`,
