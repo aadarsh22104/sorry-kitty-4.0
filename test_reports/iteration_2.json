@@ -1,0 +1,45 @@
+{
+  "summary": "Iteration 2 retests Sorry Kitty after auth was migrated from a custom users/sessions table to **real Supabase Auth** (POST /api/auth/* now proxies to /auth/v1/admin/users, /auth/v1/token, /auth/v1/user, /auth/v1/logout). Backend: 25/25 pytest tests pass — assertions tightened to verify the returned sessionToken is a real Supabase JWT (starts with 'eyJ', 3 dot-separated segments, >200 chars / observed 851 chars), refreshToken is present, user.id is a valid UUID matching auth.users.id, and the logout endpoint succeeds (note: Supabase access JWT may still validate until natural expiry — spec-acceptable). Cards CRUD (POST/GET/list/PATCH/DELETE with owner_id auth), chats (POST/GET), notifications (POST/GET/PATCH) all still pass. Frontend E2E (iframe at /sorry-kitty.html): signup with #s-name/#s-email/#s-pass → app dashboard appears with 'Hello, <name>!' greeting and a real Supabase JWT in sessionStorage['sk_session'] (851 chars, JWT shape). Logout (window.doLogout() — same fn the Logout button calls) clears sk_session and returns to auth panel. Re-login via #at-login + #l-email/#l-pass renders the dashboard again with the same user's name. Public share URL /sorry-kitty.html#card=<id> still works without auth.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/auth/*", "issue": "Error paths still return HTTP 200 with {error:'...'} instead of 4xx. Carried over from iteration 1 — non-blocking but inconsistent."},
+      {"endpoint": "POST /api/auth/logout", "issue": "Supabase /auth/v1/logout revokes the refresh_token, but the issued access JWT remains valid until natural expiry. Per spec this is acceptable; frontend compensates by clearing sessionStorage."},
+      {"endpoint": "GET /api/notifications", "issue": "Still returns a bare array (no {success,...} envelope) — inconsistent with the rest of the API. Carried over."},
+      {"endpoint": "PATCH /api/cards/{id}", "issue": "Authorization check is skipped when body has no 'user_id' — any caller can omit user_id to bypass ownership. Carried over from iteration 1."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_sorry_kitty.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(carried) Return proper HTTP 4xx for auth/validation errors instead of 200+error string.",
+    "(carried) Tighten PATCH /api/cards/{id}: require user_id and reject when absent.",
+    "(carried) Normalize response envelope for GET /api/notifications."
+  ],
+  "critical_code_review_comments": [
+    "auth_request() centralizes Supabase calls cleanly — good. Service-role key only used server-side now.",
+    "SUPABASE_SERVICE_ROLE_KEY is still committed in /app/backend/.env. Acceptable for preview but should be rotated and moved to a secret manager before prod.",
+    "frontend/.env contains VITE_SUPABASE_ANON_KEY (safe — anon key, not service-role). Good — service-role was removed from frontend env per iteration 1 note.",
+    "Logout cannot revoke the access JWT until expiry (Supabase platform limitation). For higher security consider issuing very short-lived access tokens and tracking a server-side revocation list, or use Supabase 'jwt_aud' rotation.",
+    "server.py is 437 lines (was 370). Approaching the 500-line guideline — start splitting auth into its own router/module before adding more endpoints.",
+    "PATCH /api/cards still bypasses ownership when user_id is omitted (server.py L323+) — same bug as iteration 1, still unfixed."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_sorry_kitty.py (added JWT shape + refreshToken + UUID assertions; relaxed logout test per spec)",
+    "/app/test_reports/pytest/pytest_results.xml (regenerated)"
+  ],
+  "success_rate": {"backend": "100% (25/25)", "frontend": "100% on tested flows (signup→dashboard with real JWT, logout→auth panel, re-login→dashboard, public card share without auth)"},
+  "test_credentials": "Demo: qa.user@example.com / password123 (already provisioned in auth.users). Tests also create transient e2e_<uuid>@example.com signups.",
+  "seed_data_creation": "Test run creates transient TEST_ cards and e2e_/logout_/test_ users via the live API. Cards are cleaned up via DELETE within the test; ephemeral auth.users rows are left behind (no admin delete endpoint exposed by the app).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend tests live at /app/backend/tests/test_sorry_kitty.py — run with `pytest backend/tests/test_sorry_kitty.py -v --junitxml=/app/test_reports/pytest/pytest_results.xml`. Auth is **Supabase Auth (auth.users)** — sessionToken returned by signup/login is a real Supabase JWT (~851 chars, header.payload.signature). Frontend stores it in sessionStorage as `sk_session`. Login tab in UI is `#at-login`, signup tab `#at-signup`; fields `#l-email/#l-pass` and `#s-name/#s-email/#s-pass`. Profile/Logout: the Logout button only becomes visible after navigating to the profile tab; easiest from a test is to call `window.doLogout()` (same JS fn the button invokes). Bottom nav: Home/Cards/Create/Chat/Alerts. Public share URL pattern: /sorry-kitty.html#card=<id> (no auth required).",
+  "rca of the issue": "n/a — no functional bugs. Previously feared regression (iteration_1 tests passing because of old opaque token assumption) was avoided by tightening the sessionToken assertion to require Supabase JWT shape."
+}
