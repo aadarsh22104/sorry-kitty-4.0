@@ -506,33 +506,6 @@ async function sendMoment(){
 }
 function onMomentInputChange(){}
 
-// ── SIMULATED REPLY ──
-function simulateMomentReply(emojiChar, sentText, cfg){
-  const delay = 2400 + Math.random()*1800;
-  setTimeout(()=>{
-    if(!momentCardId) return;
-    const replies = cfg
-      ? cfg.replyTexts
-      : ['🌸','...','yeah','hmm okay'];
-    const reply = replies[Math.floor(Math.random()*replies.length)];
-
-    // Reply from "them" — character returns to idle for a beat, then reacts to reply
-    showMoment(reply, false);
-
-    // Detect reply emotion and react
-    const replyEmoji = detectEmojiFromText(reply) || (emojiChar ? emojiChar : null);
-    const replyBg    = replyEmoji
-      ? (EMOJI_HOLD_CONFIG[replyEmoji] || {bg:'rgba(253,243,231,.6)',glow:'rgba(196,130,42,.2)'})
-      : detectEmotion(reply);
-
-    // Slight delay so char is back to idle before reacting to reply
-    setTimeout(()=>{
-      applyCharReaction(replyEmoji||'😊', reply);
-      applyMomentBg(replyBg);
-    }, 400);
-  }, delay);
-}
-
 // ── CHAR TAP ──
 function onCharTap(){
   const inner = document.getElementById('moment-char-inner');
