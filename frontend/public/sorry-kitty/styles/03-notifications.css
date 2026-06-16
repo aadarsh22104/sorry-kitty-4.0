@@ -1,0 +1,35 @@
+/* ─── NOTIFICATIONS ─── */
+.notif-list{padding:0 18px;}
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);animation:fadeIn .3s ease;}
+.notif-item:last-child{border-bottom:none;}
+.notif-item.unread .notif-dot{opacity:1;}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--danger);flex-shrink:0;margin-top:6px;opacity:0;transition:opacity .2s;}
+.notif-icon{font-size:28px;width:46px;height:46px;background:var(--soft);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.notif-body{flex:1;}
+.notif-title{font-weight:800;font-size:13px;color:var(--accent);margin-bottom:2px;}
+.notif-msg{font-size:12px;color:var(--muted);font-weight:600;line-height:1.5;}
+.notif-time{font-size:11px;color:var(--muted);font-weight:700;margin-top:3px;}
+.notif-action{display:flex;gap:6px;margin-top:6px;}
+.notif-toast{position:fixed;top:16px;right:16px;left:16px;max-width:420px;margin:0 auto;background:var(--accent);color:var(--softer);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:9999;animation:notifSlide .4s ease;font-weight:700;font-size:13px;}
+.notif-toast-close{margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+
+/* ══════════════════════════════════════════
+   MOMENT CHAT — Emotional Interaction Layer
+══════════════════════════════════════════ */
+@keyframes swipeIn{from{transform:translateX(-100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes momentIn{0%{opacity:0;transform:translateY(14px) scale(.92)}60%{transform:translateY(-3px) scale(1.02)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes momentOut{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.88)}}
+@keyframes charFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes charBounce{0%,100%{transform:translateY(0) scale(1)}25%{transform:translateY(-18px) scale(1.04)}50%{transform:translateY(-8px) scale(1.02)}}
+@keyframes charShake{0%,100%{transform:rotate(0) translateX(0)}20%{transform:rotate(-8deg) translateX(-4px)}40%{transform:rotate(6deg) translateX(4px)}60%{transform:rotate(-5deg) translateX(-3px)}80%{transform:rotate(3deg) translateX(2px)}}
+@keyframes charBlush{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes charSad{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(5px) rotate(-3deg)}}
+@keyframes charLook{0%,100%{transform:rotate(0)}50%{transform:rotate(-8deg) translateX(-5px)}}
+@keyframes charJump{0%{transform:translateY(0) scale(1)}20%{transform:translateY(-22px) scale(1.06) rotate(-5deg)}45%{transform:translateY(-10px) scale(1.03) rotate(3deg)}65%{transform:translateY(-16px) scale(1.04) rotate(-2deg)}85%{transform:translateY(-4px) scale(1.01)}100%{transform:translateY(0) scale(1)}}
+@keyframes charWide{0%,100%{transform:scale(1)}30%{transform:scale(1.15) translateY(-6px)}60%{transform:scale(1.08) translateY(-3px)}}
+@keyframes heartFloat{0%{opacity:1;transform:translateY(0) scale(1) rotate(0deg)}100%{opacity:0;transform:translateY(-60px) scale(1.4) rotate(15deg)}}
+@keyframes particleOut{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--px),var(--py)) scale(0)}}
+@keyframes bgPulse{0%,100%{opacity:1}50%{opacity:.7}}
+@keyframes statusBlink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes inputGlow{0%,100%{box-shadow:0 0 0 0 rgba(196,130,42,0)}50%{box-shadow:0 0 0 8px rgba(196,130,42,.12)}}
+@keyframes momentIdle{0%,100%{opacity:.5}50%{opacity:.9}}

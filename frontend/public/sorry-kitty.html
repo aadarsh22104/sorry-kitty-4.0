@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorry Kitty 🐾</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<!--
+  Sorry Kitty — modular build.
+  Frontend is a static HTML/CSS/JS app loaded inside the React shell's
+  iframe. All persistence flows through the FastAPI backend at /api/*,
+  which proxies Supabase with the service_role key. The browser never
+  receives Supabase keys.
+-->
+
+<link rel="stylesheet" href="/sorry-kitty/styles/01-base.css">
+<link rel="stylesheet" href="/sorry-kitty/styles/02-layout.css">
+<link rel="stylesheet" href="/sorry-kitty/styles/03-notifications.css">
+<link rel="stylesheet" href="/sorry-kitty/styles/04-moments.css">
+<link rel="stylesheet" href="/sorry-kitty/styles/05-profile-viewer-kitty.css">
+</head>
+<body>
+
+<!-- Markup mount point. Populated synchronously below before any script runs. -->
+<div id="app-root"></div>
+
+<script>
+  // Inject the original body markup synchronously so the DOM is ready
+  // before the feature scripts run.
+  (function injectBody(){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/sorry-kitty/html/body.html', false);
+    xhr.send(null);
+    document.getElementById('app-root').outerHTML = xhr.responseText;
+  })();
+</script>
+
+<!-- Feature scripts — order matters (later files reference earlier globals). -->
+<script src="/sorry-kitty/js/01-db.js"></script>
+<script src="/sorry-kitty/js/02-panels-auth.js"></script>
+<script src="/sorry-kitty/js/03-app-init.js"></script>
+<script src="/sorry-kitty/js/04-cards.js"></script>
+<script src="/sorry-kitty/js/05-notifications.js"></script>
+<script src="/sorry-kitty/js/06-moments.js"></script>
+<script src="/sorry-kitty/js/07-profile.js"></script>
+<script src="/sorry-kitty/js/08-card-viewer.js"></script>
+<script src="/sorry-kitty/js/09-kitty-game.js"></script>
+<script src="/sorry-kitty/js/10-bootstrap.js"></script>
+
+</body>
+</html>

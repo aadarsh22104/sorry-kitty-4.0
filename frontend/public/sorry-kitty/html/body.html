@@ -1,0 +1,652 @@
+<div id="root">
+
+<!-- ═══════ AUTH PANEL ═══════ -->
+<div class="panel" id="panel-auth">
+  <div class="auth-wrap">
+    <div class="auth-logo">🐾</div>
+    <div class="auth-title">Sorry Kitty</div>
+    <div class="auth-sub">Send adorable apologies. Melt any heart. 🌸</div>
+    <div class="auth-box">
+      <div class="auth-tabs">
+        <div class="auth-tab on" id="at-login" onclick="switchAuthTab('login')">Login</div>
+        <div class="auth-tab" id="at-signup" onclick="switchAuthTab('signup')">Sign up</div>
+      </div>
+      <div id="af-login">
+        <label>Email</label>
+        <input type="email" id="l-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doLogin()">
+        <label>Password</label>
+        <input type="password" id="l-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="btn btn-main btn-block" style="margin-top:18px;" onclick="doLogin()">Login 🐾</button>
+        <span class="err" id="l-err" style="display:none;"></span>
+        <p class="hint">No account? <a onclick="switchAuthTab('signup')">Sign up free →</a></p>
+      </div>
+      <div id="af-signup" style="display:none;">
+        <label>Your Name</label>
+        <input type="text" id="s-name" placeholder="e.g. Alex">
+        <label>Avatar</label>
+        <div class="avatar-picker" id="signup-av-picker">
+          <span class="av-opt sel" data-av="🐱" onclick="pickSignupAv(this)">🐱</span>
+          <span class="av-opt" data-av="🐼" onclick="pickSignupAv(this)">🐼</span>
+          <span class="av-opt" data-av="🐨" onclick="pickSignupAv(this)">🐨</span>
+          <span class="av-opt" data-av="🐸" onclick="pickSignupAv(this)">🐸</span>
+          <span class="av-opt" data-av="🦊" onclick="pickSignupAv(this)">🦊</span>
+          <span class="av-opt" data-av="🐰" onclick="pickSignupAv(this)">🐰</span>
+          <span class="av-opt" data-av="🦁" onclick="pickSignupAv(this)">🦁</span>
+          <span class="av-opt" data-av="🐧" onclick="pickSignupAv(this)">🐧</span>
+          <span class="av-opt" data-av="🐻" onclick="pickSignupAv(this)">🐻</span>
+          <span class="av-opt" data-av="🦋" onclick="pickSignupAv(this)">🦋</span>
+        </div>
+        <label>Email</label>
+        <input type="email" id="s-email" placeholder="you@example.com">
+        <label>Password</label>
+        <input type="password" id="s-pass" placeholder="min 6 characters">
+        <button class="btn btn-main btn-block" style="margin-top:18px;" onclick="doSignup()">Create Account 🌸</button>
+        <span class="err" id="s-err" style="display:none;"></span>
+        <span class="succ" id="s-ok" style="display:none;"></span>
+        <p class="hint">Have an account? <a onclick="switchAuthTab('login')">Login →</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MAIN APP ═══════ -->
+<div class="panel" id="panel-app">
+  <!-- TOP NAV -->
+  <div class="topnav">
+    <div class="topnav-logo" onclick="goTab('home')">🐾 Sorry Kitty</div>
+    <div class="topnav-actions">
+      <button class="nav-icon-btn" onclick="goTab('notifs')" id="notif-nav-btn" title="Notifications">
+        🔔<span class="nav-badge" id="notif-badge" style="display:none;">0</span>
+      </button>
+      <button class="nav-icon-btn" onclick="goTab('profile')" id="profile-nav-btn" title="Profile">
+        <span id="nav-avatar">🐱</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- TAB CONTENT -->
+  <div id="tab-home" class="tab-content" style="flex:1;overflow-y:auto;padding-bottom:70px;">
+    <!-- Hero -->
+    <div class="home-hero">
+      <div class="home-hero-title">Hello, <span id="hero-name">friend</span>! 👋</div>
+      <div class="home-hero-sub">Ready to send some love? Your characters are waiting 🌸</div>
+      <div class="home-hero-chars" id="hero-chars">
+        <span class="hero-char" onclick="bounceBounce(this)">🐱</span>
+        <span class="hero-char" onclick="bounceBounce(this)">🐼</span>
+        <span class="hero-char" onclick="bounceBounce(this)">🐻</span>
+        <span class="hero-char" onclick="bounceBounce(this)">🐧</span>
+        <span class="hero-char" onclick="bounceBounce(this)">🦊</span>
+      </div>
+    </div>
+    <!-- Stats -->
+    <div class="home-stats">
+      <div class="stat-card"><div class="stat-num" id="stat-cards">0</div><div class="stat-label">Cards</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-sent">0</div><div class="stat-label">Sent</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-smiles">0</div><div class="stat-label">Smiles 😊</div></div>
+    </div>
+    <!-- Quick actions -->
+    <div class="home-section"><div class="home-section-title">Quick Actions</div></div>
+    <div class="quick-action-row">
+      <button class="qa-btn" onclick="goTab('create')"><span class="qa-icon">✨</span><span class="qa-label">New Card</span></button>
+      <button class="qa-btn" onclick="goTab('cards')"><span class="qa-icon">📬</span><span class="qa-label">My Cards</span></button>
+      <button class="qa-btn" onclick="goTab('chat')"><span class="qa-icon">💬</span><span class="qa-label">Messages</span></button>
+      <button class="qa-btn" onclick="goTab('notifs')"><span class="qa-icon">🔔</span><span class="qa-label">Alerts</span></button>
+      <button class="qa-btn" onclick="goTab('profile')"><span class="qa-icon">⚙️</span><span class="qa-label">Settings</span></button>
+    </div>
+    <!-- My cards preview -->
+    <div class="home-section">
+      <div class="row-between" style="margin-bottom:10px;">
+        <div class="home-section-title" style="margin:0;">My Cards</div>
+        <button class="btn btn-ghost btn-sm" onclick="goTab('cards')">See all →</button>
+      </div>
+      <div class="card-grid" id="home-card-grid">
+        <div class="mini-card" onclick="goTab('create')" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100px;">
+          <span style="font-size:32px;">+</span>
+          <span style="font-size:12px;font-weight:800;color:var(--muted);margin-top:4px;">New Card</span>
+        </div>
+      </div>
+    </div>
+    <!-- Activity -->
+    <div class="home-section" style="margin-top:4px;">
+      <div class="home-section-title">Recent Activity</div>
+      <div id="activity-list">
+        <div class="activity-item">
+          <div class="activity-icon">✨</div>
+          <div class="activity-text">
+            <div class="activity-title">Welcome to Sorry Kitty! 🐾</div>
+            <div class="activity-sub">Create your first sorry card to get started</div>
+          </div>
+          <div class="activity-time">now</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-cards" class="tab-content" style="display:none;flex:1;overflow-y:auto;padding-bottom:70px;">
+    <div style="padding:18px 18px 8px;" class="row-between">
+      <h2>My Cards 📬</h2>
+      <button class="btn btn-main btn-sm" onclick="goTab('create')">+ New</button>
+    </div>
+    <div class="page-body" id="cards-list-body" style="padding-top:0;"></div>
+    <button class="fab" onclick="goTab('create')" title="New card">+</button>
+  </div>
+
+  <div id="tab-chat" class="tab-content" style="display:none;flex:1;flex-direction:column;overflow:hidden;padding-bottom:70px;">
+    <div class="moment-tab" style="height:calc(100vh - 70px);">
+      <div class="moment-tab-header">
+        <div class="moment-tab-title">Moments</div>
+        <button class="moment-tab-icon" onclick="goTab('create')" title="Create a card">+</button>
+      </div>
+      <div class="moment-card-list" id="moment-card-list"></div>
+    </div>
+  </div>
+
+  <div id="tab-notifs" class="tab-content" style="display:none;flex:1;overflow-y:auto;padding-bottom:70px;">
+    <div style="padding:18px 18px 8px;" class="row-between">
+      <h2>Notifications 🔔</h2>
+      <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
+    </div>
+    <div class="notif-list" id="notif-list-body"></div>
+  </div>
+
+  <div id="tab-create" class="tab-content" style="display:none;flex:1;overflow-y:auto;padding-bottom:80px;">
+    <div class="create-header">
+      <div class="create-header-inner">
+        <button class="btn btn-ghost btn-sm" onclick="goTab('cards')">← Back</button>
+        <div class="create-title" id="create-mode-title">✨ New Card</div>
+        <button class="btn btn-main btn-sm" onclick="saveCard()">Save 💾</button>
+      </div>
+    </div>
+    <div class="page-body" id="create-form-body">
+      <!-- CHARACTER -->
+      <div class="section-box">
+        <div class="section-box-title">🐾 Choose Your Character</div>
+        <div class="char-picker" id="char-picker">
+          <div class="char-opt sel" data-char="cat" onclick="pickChar(this)"><span class="char-opt-emoji">🐱</span><span class="char-opt-name">Kitty</span></div>
+          <div class="char-opt" data-char="panda" onclick="pickChar(this)"><span class="char-opt-emoji">🐼</span><span class="char-opt-name">Panda</span></div>
+          <div class="char-opt" data-char="bear" onclick="pickChar(this)"><span class="char-opt-emoji">🐻</span><span class="char-opt-name">Bear</span></div>
+          <div class="char-opt" data-char="penguin" onclick="pickChar(this)"><span class="char-opt-emoji">🐧</span><span class="char-opt-name">Penguin</span></div>
+          <div class="char-opt" data-char="fox" onclick="pickChar(this)"><span class="char-opt-emoji">🦊</span><span class="char-opt-name">Fox</span></div>
+          <div class="char-opt" data-char="bunny" onclick="pickChar(this)"><span class="char-opt-emoji">🐰</span><span class="char-opt-name">Bunny</span></div>
+          <div class="char-opt" data-char="dog" onclick="pickChar(this)"><span class="char-opt-emoji">🐶</span><span class="char-opt-name">Pupper</span></div>
+          <div class="char-opt" data-char="frog" onclick="pickChar(this)"><span class="char-opt-emoji">🐸</span><span class="char-opt-name">Froggo</span></div>
+          <div class="char-opt" data-char="lion" onclick="pickChar(this)"><span class="char-opt-emoji">🦁</span><span class="char-opt-name">Lion</span></div>
+          <div class="char-opt" data-char="koala" onclick="pickChar(this)"><span class="char-opt-emoji">🐨</span><span class="char-opt-name">Koala</span></div>
+        </div>
+      </div>
+
+      <!-- PEOPLE -->
+      <div class="section-box">
+        <div class="section-box-title">💌 The People</div>
+        <label>Recipient Name</label>
+        <input type="text" id="c-recipient" placeholder="e.g. Sarah, Sunshine, Babe...">
+        <label>Your Name (Sender)</label>
+        <input type="text" id="c-sender" placeholder="e.g. Alex">
+        <label>Card Tagline / Header</label>
+        <input type="text" id="c-tagline" placeholder="e.g. A special delivery just for you 🌸">
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="section-box">
+        <div class="section-box-title">📝 Your Message</div>
+        <label>Apology / Love Message</label>
+        <textarea id="c-message" placeholder="What do you want to say? Be heartfelt! e.g. I'm so sorry I forgot our plans, you mean everything to me..."></textarea>
+        <label>Quick Message Tone</label>
+        <div class="msg-options" id="msg-tone-opts">
+          <div class="msg-opt sel" data-tone="sorry" onclick="pickTone(this)">😔 Apology</div>
+          <div class="msg-opt" data-tone="love" onclick="pickTone(this)">❤️ Love note</div>
+          <div class="msg-opt" data-tone="miss" onclick="pickTone(this)">🥺 Missing you</div>
+          <div class="msg-opt" data-tone="cheer" onclick="pickTone(this)">🎉 Cheer up!</div>
+        </div>
+        <label style="margin-top:10px;">Forgive Button Text</label>
+        <input type="text" id="c-forgive-text" placeholder="e.g. Forgive me? 🥺 / Accept apology? / I forgive you!">
+        <div class="toggle-row" style="margin-top:10px;">
+          <span class="toggle-label">Show running away button</span>
+          <button class="toggle on" id="toggle-runaway" onclick="toggleOpt(this,'runaway')"></button>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Show treat-feeding mini game</span>
+          <button class="toggle on" id="toggle-treats" onclick="toggleOpt(this,'treats')"></button>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Show mood meter</span>
+          <button class="toggle on" id="toggle-mood" onclick="toggleOpt(this,'mood')"></button>
+        </div>
+      </div>
+
+      <!-- TREATS -->
+      <div class="section-box">
+        <div class="section-box-title">🍭 Treats the Character Delivers</div>
+        <div class="emoji-picker-row" id="treat-picker">
+          <span class="ep-chip sel" data-e="🍫" onclick="pickTreat(this)">🍫</span>
+          <span class="ep-chip sel" data-e="🥐" onclick="pickTreat(this)">🥐</span>
+          <span class="ep-chip sel" data-e="🍪" onclick="pickTreat(this)">🍪</span>
+          <span class="ep-chip sel" data-e="🎂" onclick="pickTreat(this)">🎂</span>
+          <span class="ep-chip" data-e="🌹" onclick="pickTreat(this)">🌹</span>
+          <span class="ep-chip" data-e="🎁" onclick="pickTreat(this)">🎁</span>
+          <span class="ep-chip" data-e="🍰" onclick="pickTreat(this)">🍰</span>
+          <span class="ep-chip" data-e="🧁" onclick="pickTreat(this)">🧁</span>
+          <span class="ep-chip" data-e="🍓" onclick="pickTreat(this)">🍓</span>
+          <span class="ep-chip" data-e="⭐" onclick="pickTreat(this)">⭐</span>
+          <span class="ep-chip" data-e="💎" onclick="pickTreat(this)">💎</span>
+          <span class="ep-chip" data-e="🎀" onclick="pickTreat(this)">🎀</span>
+        </div>
+      </div>
+
+      <!-- THEME -->
+      <div class="section-box">
+        <div class="section-box-title">🎨 Theme & Colors</div>
+        <label>Preset Themes</label>
+        <div class="theme-picker" id="theme-picker">
+          <div class="theme-opt sel" data-bg="#fdf3e7" data-ac="#3d1a00" data-a2="#c4822a" data-tx="#6b3a1f" style="background:linear-gradient(135deg,#f5e6cc,#c4822a);" onclick="pickTheme(this)"></div>
+          <div class="theme-opt" data-bg="#e8f4f8" data-ac="#1a3a5c" data-a2="#2980b9" data-tx="#2c5f8a" style="background:linear-gradient(135deg,#aed6f1,#2980b9);" onclick="pickTheme(this)"></div>
+          <div class="theme-opt" data-bg="#f3e8ff" data-ac="#5b1a6b" data-a2="#9b59b6" data-tx="#7d3c98" style="background:linear-gradient(135deg,#d2b4de,#9b59b6);" onclick="pickTheme(this)"></div>
+          <div class="theme-opt" data-bg="#e8f8e8" data-ac="#1a4a1a" data-a2="#27ae60" data-tx="#1e8449" style="background:linear-gradient(135deg,#a9dfbf,#27ae60);" onclick="pickTheme(this)"></div>
+          <div class="theme-opt" data-bg="#fff0f0" data-ac="#6b1a1a" data-a2="#e74c3c" data-tx="#922b21" style="background:linear-gradient(135deg,#f5b7b1,#e74c3c);" onclick="pickTheme(this)"></div>
+          <div class="theme-opt" data-bg="#1a1a2e" data-ac="#e0c07a" data-a2="#c4a042" data-tx="#b7950b" style="background:linear-gradient(135deg,#16213e,#c4a042);" onclick="pickTheme(this)"></div>
+          <div class="theme-opt" data-bg="#fff5f8" data-ac="#8b1a4a" data-a2="#e91e8c" data-tx="#c2185b" style="background:linear-gradient(135deg,#f8bbd0,#e91e8c);" onclick="pickTheme(this)"></div>
+          <div class="theme-opt" data-bg="#fffff0" data-ac="#4a4a00" data-a2="#f4c00a" data-tx="#7d6608" style="background:linear-gradient(135deg,#fff9c4,#f4c00a);" onclick="pickTheme(this)"></div>
+        </div>
+        <label>Custom Background Color</label>
+        <div class="color-input-row">
+          <input type="color" id="c-bg-color" value="#fdf3e7" oninput="applyCustomColor()">
+          <span style="font-size:13px;font-weight:700;color:var(--muted);">Background</span>
+        </div>
+        <div class="color-input-row" style="margin-top:8px;">
+          <input type="color" id="c-accent-color" value="#3d1a00" oninput="applyCustomColor()">
+          <span style="font-size:13px;font-weight:700;color:var(--muted);">Accent / Text</span>
+        </div>
+        <div class="color-input-row" style="margin-top:8px;">
+          <input type="color" id="c-a2-color" value="#c4822a" oninput="applyCustomColor()">
+          <span style="font-size:13px;font-weight:700;color:var(--muted);">Highlight Color</span>
+        </div>
+        <label>Font Style</label>
+        <div class="font-picker" id="font-picker">
+          <div class="font-opt sel" data-font="Nunito" onclick="pickFont(this)" style="font-family:Nunito,sans-serif;">Nunito</div>
+          <div class="font-opt" data-font="Georgia" onclick="pickFont(this)" style="font-family:Georgia,serif;">Serif</div>
+          <div class="font-opt" data-font="monospace" onclick="pickFont(this)" style="font-family:monospace;">Mono</div>
+          <div class="font-opt" data-font="cursive" onclick="pickFont(this)" style="font-family:cursive;">Cursive</div>
+        </div>
+        <label>Character Size</label>
+        <div class="range-row">
+          <input type="range" id="c-char-size" min="120" max="220" value="170" oninput="document.getElementById('char-size-val').textContent=this.value+'px'">
+          <span class="range-val" id="char-size-val">170px</span>
+        </div>
+        <div class="toggle-row" style="margin-top:6px;">
+          <span class="toggle-label">Animated stripe header</span>
+          <button class="toggle on" id="toggle-stripe" onclick="toggleOpt(this,'stripe')"></button>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Floating background emojis</span>
+          <button class="toggle on" id="toggle-floaties" onclick="toggleOpt(this,'floaties')"></button>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Star particles</span>
+          <button class="toggle on" id="toggle-stars" onclick="toggleOpt(this,'stars')"></button>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Mouse/touch trail effect</span>
+          <button class="toggle on" id="toggle-trail" onclick="toggleOpt(this,'trail')"></button>
+        </div>
+      </div>
+
+      <!-- FLOATIES & CONFETTI -->
+      <div class="section-box">
+        <div class="section-box-title">✨ Floating Emojis & Confetti</div>
+        <label>Background Floating Emojis</label>
+        <input type="text" id="c-floaties" placeholder="e.g. 🌸 ✨ 🐾 ⭐ 🍫 (space separated)">
+        <label>Confetti Emojis</label>
+        <input type="text" id="c-confetti" placeholder="e.g. 🎉 🎊 ✨ 🌟">
+        <label>Screen Quotes (one per line)</label>
+        <textarea id="c-quotes" placeholder="e.g. They're really not that bad 😅&#10;They're trying so hard 🌸&#10;One more chance? 🥺" style="min-height:100px;"></textarea>
+      </div>
+
+      <!-- FINAL SCREEN -->
+      <div class="section-box">
+        <div class="section-box-title">🎉 Final Screen</div>
+        <label>Closing Message</label>
+        <textarea id="c-closing" placeholder="e.g. Just wanted to make you smile 😸 Love you always!"></textarea>
+        <label>Send-smile Button Text</label>
+        <input type="text" id="c-smile-btn" placeholder="e.g. Send a tiny smile back 😊">
+        <label>After-smile Message</label>
+        <input type="text" id="c-after-smile" placeholder="e.g. Mission complete!! 🎉 They'll be so happy!">
+      </div>
+
+      <span class="err" id="create-err" style="display:none;padding:0 2px;"></span>
+      <span class="succ" id="create-ok" style="display:none;padding:0 2px;"></span>
+    </div>
+  </div>
+
+  <div id="tab-profile" class="tab-content" style="display:none;flex:1;overflow-y:auto;padding-bottom:70px;">
+    <div class="profile-hero">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar" id="prof-avatar">🐱</div>
+      </div>
+      <div class="profile-name" id="prof-name">Loading...</div>
+      <div class="profile-email" id="prof-email"></div>
+      <div class="profile-stats">
+        <div class="prof-stat"><div class="prof-stat-num" id="ps-cards">0</div><div class="prof-stat-label">Cards</div></div>
+        <div class="prof-stat"><div class="prof-stat-num" id="ps-sent">0</div><div class="prof-stat-label">Sent</div></div>
+        <div class="prof-stat"><div class="prof-stat-num" id="ps-smiles">0</div><div class="prof-stat-label">Smiles</div></div>
+      </div>
+    </div>
+    <div style="padding:14px 18px 4px;"><h2 style="font-size:18px;">Settings ⚙️</h2></div>
+    <div class="settings-section">
+      <div class="settings-item" onclick="openModal('modal-edit-profile')">
+        <div class="settings-icon">✏️</div>
+        <div class="settings-text"><div class="settings-label">Edit Profile</div><div class="settings-sub">Name, avatar, email</div></div>
+        <div class="settings-arrow">›</div>
+      </div>
+      <div class="settings-item" onclick="openModal('modal-notif-settings')">
+        <div class="settings-icon">🔔</div>
+        <div class="settings-text"><div class="settings-label">Notification Settings</div><div class="settings-sub">Control alerts</div></div>
+        <div class="settings-arrow">›</div>
+      </div>
+      <div class="settings-item" onclick="openModal('modal-privacy')">
+        <div class="settings-icon">🔒</div>
+        <div class="settings-text"><div class="settings-label">Privacy & Links</div><div class="settings-sub">Who can see your cards</div></div>
+        <div class="settings-arrow">›</div>
+      </div>
+      <div class="settings-item" onclick="openModal('modal-change-pass')">
+        <div class="settings-icon">🔑</div>
+        <div class="settings-text"><div class="settings-label">Change Password</div><div class="settings-sub">Keep your account secure</div></div>
+        <div class="settings-arrow">›</div>
+      </div>
+    </div>
+    <div style="padding:4px 18px 0;"><h2 style="font-size:18px;">About 🐾</h2></div>
+    <div class="settings-section">
+      <div class="settings-item">
+        <div class="settings-icon">ℹ️</div>
+        <div class="settings-text"><div class="settings-label">Sorry Kitty v2.0</div><div class="settings-sub">Made with 🌸 for everyone</div></div>
+      </div>
+    </div>
+    <div style="padding:18px;">
+      <button class="btn btn-danger btn-block" onclick="doLogout()">Logout 👋</button>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tabbar">
+    <button class="tabbar-item on" id="tb-home" onclick="goTab('home')">
+      <span class="ti-icon">🏠</span><span class="ti-label">Home</span>
+    </button>
+    <button class="tabbar-item" id="tb-cards" onclick="goTab('cards')">
+      <span class="ti-icon">📬</span><span class="ti-label">Cards</span>
+    </button>
+    <button class="tabbar-item" id="tb-create" onclick="goTab('create')">
+      <span class="ti-icon">✨</span><span class="ti-label">Create</span>
+    </button>
+    <button class="tabbar-item" id="tb-chat" onclick="goTab('chat')">
+      <span class="ti-icon">💬</span><span class="ti-label">Chat</span>
+    </button>
+    <button class="tabbar-item" id="tb-notifs" onclick="goTab('notifs')">
+      <span class="ti-icon">🔔</span><span class="ti-label">Alerts</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════ CARD VIEWER (full screen) ═══════ -->
+<div class="card-viewer" id="card-viewer">
+  <div id="kitty-app">
+    <canvas id="kcanvas" style="position:absolute;inset:0;pointer-events:none;z-index:0;"></canvas>
+    <div class="kstripe" id="kstripe"></div>
+    <!-- Screen 1 -->
+    <div class="kscreen active" id="ks1">
+      <button class="kback-btn" onclick="closeCardViewer()">✕</button>
+      <div class="kmsign" id="kv-tagline">✦ A Special Delivery ✦</div>
+      <div class="kname-big" id="kv-recipient"></div>
+      <div class="char-wrap" id="kw1" onclick="kpet(1)">
+        <div id="kchar1" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:120px;animation:bodyBob 2.2s ease-in-out infinite;"></div>
+        <div class="kbubble" id="kb1">Hiii!! 🐾</div>
+      </div>
+      <p class="ktitle" id="kv-s1-title">Hi there... I'm here for you! 🐾</p>
+      <p class="ksub" id="kv-s1-sub">I'm on a special mission 🌸</p>
+      <button class="kbigbtn" onclick="kgoTo(2)" id="kbtn1">What mission? 👀 →</button>
+      <div class="kdots"><div class="kdot on" id="kd1-1"></div><div class="kdot" id="kd1-2"></div><div class="kdot" id="kd1-3"></div><div class="kdot" id="kd1-4"></div><div class="kdot" id="kd1-5"></div><div class="kdot" id="kd1-6"></div></div>
+      <div class="kprog"><div class="kpfill" style="width:16%" id="kpf1"></div></div>
+    </div>
+    <!-- Screen 2 -->
+    <div class="kscreen" id="ks2">
+      <button class="kback-btn" onclick="kgoTo(1)">←</button>
+      <div class="char-wrap" id="kw2" onclick="kpet(2)">
+        <div id="kchar2" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:100px;animation:bodyBob 2s ease-in-out infinite;animation-delay:.2s;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15));"></div>
+        <div class="kbubble" id="kb2">Humans... 🙄</div>
+      </div>
+      <p class="ktitle">My human did something dumb 😑</p>
+      <p class="ksub" id="kv-message"></p>
+      <div class="kqcard" id="krq">🌸 "They're actually not that bad..."</div>
+      <button class="kbigbtn" onclick="kgoTo(3)" id="kbtn2">Tell me more 🌸 →</button>
+      <div class="kdots"><div class="kdot" id="kd2-1"></div><div class="kdot on" id="kd2-2"></div><div class="kdot" id="kd2-3"></div><div class="kdot" id="kd2-4"></div><div class="kdot" id="kd2-5"></div><div class="kdot" id="kd2-6"></div></div>
+      <div class="kprog"><div class="kpfill" style="width:33%" id="kpf2"></div></div>
+    </div>
+    <!-- Screen 3 -->
+    <div class="kscreen" id="ks3">
+      <button class="kback-btn" onclick="kgoTo(2)">←</button>
+      <div class="char-wrap" id="kw3" onclick="kpet(3)" style="cursor:pointer;">
+        <div id="kchar3" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:110px;animation:pawBeg 1.6s ease-in-out infinite;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15));"></div>
+        <div class="kbubble" id="kb3">Pleeeease 🥺</div>
+      </div>
+      <p class="ktitle" id="kv-s3-title">They're genuinely sorry 😿</p>
+      <p class="ksub" id="kv-s3-sub">They didn't mean to hurt you...</p>
+      <div class="kmoodbar" id="kmoodbar-wrap">
+        <span style="font-size:12px;font-weight:700;" id="kv-mood-label">Your mood</span>
+        <div class="kmoodbar-track"><div class="kmoodbar-fill" id="kmd3" style="width:20%;"></div></div>
+        <span id="kme3">😶</span>
+      </div>
+      <button class="kbigbtn" onclick="kgoTo(4)" id="kbtn3">Okay... 🥺 →</button>
+      <div class="kdots"><div class="kdot" id="kd3-1"></div><div class="kdot" id="kd3-2"></div><div class="kdot on" id="kd3-3"></div><div class="kdot" id="kd3-4"></div><div class="kdot" id="kd3-5"></div><div class="kdot" id="kd3-6"></div></div>
+      <div class="kprog"><div class="kpfill" style="width:50%" id="kpf3"></div></div>
+    </div>
+    <!-- Screen 4 -->
+    <div class="kscreen" id="ks4">
+      <button class="kback-btn" onclick="kgoTo(3)">←</button>
+      <div class="char-wrap" id="kw4" onclick="kpet(4)">
+        <div id="kchar4" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:120px;animation:bodyBob 1.8s ease-in-out infinite;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15));"></div>
+        <div class="kbubble" id="kb4">FEED ME!! 😻</div>
+      </div>
+      <p class="ktitle">Treats time! 🍭</p>
+      <p class="ksub">Give them a treat! They worked so hard 🐾</p>
+      <div class="ktrow" id="ktreat-row"></div>
+      <div class="krmsg" id="kfmsg"></div>
+      <div class="kmoodbar" id="khappy-bar">
+        <span style="font-size:12px;font-weight:700;">Happiness</span>
+        <div class="kmoodbar-track"><div class="kmoodbar-fill" id="kkf" style="width:8%;"></div></div>
+        <span id="kke">😐</span>
+      </div>
+      <button class="kbigbtn" onclick="kgoTo(5)" id="kbtn4" style="margin-top:8px;">Next 🐾 →</button>
+      <div class="kdots"><div class="kdot" id="kd4-1"></div><div class="kdot" id="kd4-2"></div><div class="kdot" id="kd4-3"></div><div class="kdot on" id="kd4-4"></div><div class="kdot" id="kd4-5"></div><div class="kdot" id="kd4-6"></div></div>
+      <div class="kprog"><div class="kpfill" style="width:66%" id="kpf4"></div></div>
+    </div>
+    <!-- Screen 5 -->
+    <div class="kscreen" id="ks5">
+      <button class="kback-btn" onclick="kgoTo(4)">←</button>
+      <div class="char-wrap" id="kw5" onclick="kpet(5)">
+        <div id="kchar5" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:120px;animation:wiggle .8s ease-in-out infinite;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15));"></div>
+        <div class="kbubble" id="kb5">Catch me!! 😼</div>
+      </div>
+      <p class="ktitle">The Big Question 👀</p>
+      <p class="ksub" id="krsub">Will you forgive them?<br><span style="font-size:.87em;opacity:.65;">tap the button if you dare... 😼</span></p>
+      <div class="kfzone" id="kfzone-wrap">
+        <button id="kfbtn">Forgive them? 👀</button>
+      </div>
+      <div class="kqcard" id="krq5">🌸 "They're really trying hard..."</div>
+      <div class="kdots"><div class="kdot" id="kd5-1"></div><div class="kdot" id="kd5-2"></div><div class="kdot" id="kd5-3"></div><div class="kdot" id="kd5-4"></div><div class="kdot on" id="kd5-5"></div><div class="kdot" id="kd5-6"></div></div>
+      <div class="kprog"><div class="kpfill" style="width:83%" id="kpf5"></div></div>
+    </div>
+    <!-- Screen 6 -->
+    <div class="kscreen" id="ks6">
+      <div id="kczone" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1;"></div>
+      <div class="char-wrap" id="kw6" onclick="kpet(6)" style="z-index:2;position:relative;">
+        <div id="kchar6" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:130px;animation:heartbeat 1.5s ease-in-out infinite;filter:drop-shadow(0 6px 16px rgba(0,0,0,.18));"></div>
+        <div class="kbubble" id="kb6">Mission done!! 🎉</div>
+      </div>
+      <div class="kspin" style="z-index:2;position:relative;">🌟</div>
+      <p class="ktitle" id="kv-final-title" style="animation:shimmerText 3s infinite;z-index:2;position:relative;">Mission complete!! 🎉</p>
+      <p class="ksub" id="kv-final-msg" style="z-index:2;position:relative;"></p>
+      <div id="kfloaties" style="min-height:42px;margin:6px 0;z-index:2;position:relative;"></div>
+      <button class="kbigbtn" id="ksmile-btn" onclick="kSendSmile()" style="animation:pulse 1.5s ease-in-out infinite;z-index:2;position:relative;">Send a tiny smile back 😊</button>
+      <div id="kaftersmile" style="opacity:0;margin-top:10px;font-size:14px;font-weight:800;transition:opacity .5s;z-index:2;position:relative;"></div>
+      <button class="kbigbtn" id="kchat-btn" onclick="kOpenChat()" style="margin-top:12px;background:#2980b9;color:#fff;box-shadow:0 6px 0 #1a5276;z-index:2;position:relative;display:inline-flex;align-items:center;gap:8px;">💬 Chat with them</button>
+      <div class="kdots" style="z-index:2;position:relative;"><div class="kdot" id="kd6-1"></div><div class="kdot" id="kd6-2"></div><div class="kdot" id="kd6-3"></div><div class="kdot" id="kd6-4"></div><div class="kdot" id="kd6-5"></div><div class="kdot on" id="kd6-6"></div></div>
+      <div class="kprog" style="z-index:2;position:relative;"><div class="kpfill" style="width:100%" id="kpf6"></div></div>
+    </div>
+    <div id="kbgf-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;"></div>
+  </div>
+  <div style="text-align:center;padding:10px;background:var(--softer);font-size:12px;font-weight:700;color:var(--muted);">Made with 🐾 on <span style="color:var(--danger);cursor:pointer;" onclick="closeCardViewer();showPanel('panel-auth')">Sorry Kitty</span> — create your own!</div>
+</div>
+
+<!-- ═══════ MOMENT WINDOW ═══════ -->
+<div class="moment-window" id="moment-window">
+  <!-- Animated background -->
+  <div class="moment-bg" id="moment-bg">
+    <div class="moment-blob" id="moment-blob1" style="width:240px;height:240px;top:-40px;left:-60px;background:rgba(196,130,42,.08);"></div>
+    <div class="moment-blob" id="moment-blob2" style="width:200px;height:200px;bottom:-40px;right:-40px;background:rgba(212,160,23,.07);"></div>
+  </div>
+
+  <!-- Top bar -->
+  <div class="moment-topbar">
+    <button class="moment-back" onclick="closeMomentWindow()">←</button>
+    <div class="moment-presence">
+      <div class="moment-presence-dot" id="mpresence-dot"></div>
+      <div>
+        <div class="moment-presence-name" id="mpresence-name">—</div>
+        <div class="moment-presence-status" id="mpresence-status">feeling your presence</div>
+      </div>
+    </div>
+    <button class="moment-menu-btn" onclick="toggleMomentMenu()" id="moment-menu-btn">⋮</button>
+  </div>
+
+  <!-- Dropdown menu -->
+  <div class="moment-menu" id="moment-menu">
+    <div class="moment-menu-item" onclick="openMomentCard()">📬 View Card</div>
+    <div class="moment-menu-item" onclick="copyMomentLink()">🔗 Copy Link</div>
+    <div class="moment-menu-item danger" onclick="blockMoment()">🚫 Block</div>
+    <div class="moment-menu-item danger" onclick="deleteMoment()">🗑 Delete Moment</div>
+  </div>
+
+  <!-- Emoji selector — right side, vertical: tap ❤️ to expand, tap any emoji to fire -->
+  <div class="emoji-selector" id="emoji-selector">
+    <button class="emoji-sel-btn" data-emoji="❤️" data-hold="hold-chest"
+      onclick="tapMomentEmoji(this)" title="Love">❤️</button>
+    <div class="emoji-sel-divider"></div>
+    <button class="emoji-sel-btn" data-emoji="😊" data-hold="hold-side"
+      onclick="tapMomentEmoji(this)" title="Happy">😊</button>
+    <button class="emoji-sel-btn" data-emoji="😢" data-hold="hold-loose"
+      onclick="tapMomentEmoji(this)" title="Sad">😢</button>
+    <button class="emoji-sel-btn" data-emoji="😡" data-hold="hold-tight"
+      onclick="tapMomentEmoji(this)" title="Angry">😡</button>
+    <button class="emoji-sel-btn" data-emoji="😲" data-hold="hold-face"
+      onclick="tapMomentEmoji(this)" title="Surprised">😲</button>
+    <button class="emoji-sel-btn" data-emoji="😌" data-hold="hold-gentle"
+      onclick="tapMomentEmoji(this)" title="Calm">😌</button>
+    <button class="emoji-sel-btn" data-emoji="🩴" data-hold="hold-swing"
+      onclick="tapMomentEmoji(this)" title="Playful!">🩴</button>
+    <button class="emoji-sel-collapse" onclick="collapseEmojiBar()" title="Close">✕</button>
+  </div>
+
+  <!-- Character stage — holds both character and held-emoji -->
+  <div class="moment-stage" id="moment-stage" style="position:relative;">
+    <div class="moment-char-wrap" id="moment-char-wrap" onclick="onCharTap()" style="position:relative;">
+      <div class="moment-char-glow" id="moment-char-glow"></div>
+      <div class="moment-char-inner" id="moment-char-inner"></div>
+      <div class="moment-emotion-tag" id="moment-emotion-tag"></div>
+      <!-- Held emoji — anchored inside char-wrap so it moves WITH the character -->
+      <div class="held-emoji-wrap" id="held-emoji-wrap" style="display:none;position:absolute;">
+        <div class="held-emoji-inner" id="held-emoji-inner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating message zone — ONE message at a time -->
+  <div class="moment-msg-zone" id="moment-msg-zone">
+    <div class="moment-idle-hint" id="moment-idle-hint">say something... 💬</div>
+  </div>
+
+  <!-- Card mini-strip -->
+  <div class="moment-share-card-strip" id="moment-card-strip"></div>
+
+  <!-- Input -->
+  <div class="moment-input-wrap">
+    <input class="moment-input" id="moment-input"
+      placeholder="say something..."
+      onkeydown="if(event.key==='Enter'){event.preventDefault();sendMoment();}"
+      oninput="onMomentInputChange(this)"
+      maxlength="200">
+    <button class="moment-send" id="moment-send-btn" onclick="sendMoment()">➤</button>
+  </div>
+
+  <!-- Blocked overlay -->
+  <div class="moment-blocked" id="moment-blocked">
+    <div class="moment-blocked-icon">🚫</div>
+    <div class="moment-blocked-title">Interaction Blocked</div>
+    <div class="moment-blocked-sub">You've blocked this moment.<br>Tap to unblock.</div>
+    <button class="btn btn-sec" style="margin-top:20px;" onclick="unblockMoment()">Unblock</button>
+  </div>
+</div>
+
+<!-- ═══════ MODALS ═══════ -->
+<!-- Edit profile -->
+<div id="modal-edit-profile" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal(this)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ Edit Profile</div>
+    <label>Display Name</label>
+    <input type="text" id="ep-name" placeholder="Your name">
+    <label>Avatar</label>
+    <div class="avatar-picker" id="ep-av-picker">
+      <span class="av-opt" data-av="🐱" onclick="pickEpAv(this)">🐱</span>
+      <span class="av-opt" data-av="🐼" onclick="pickEpAv(this)">🐼</span>
+      <span class="av-opt" data-av="🐨" onclick="pickEpAv(this)">🐨</span>
+      <span class="av-opt" data-av="🐸" onclick="pickEpAv(this)">🐸</span>
+      <span class="av-opt" data-av="🦊" onclick="pickEpAv(this)">🦊</span>
+      <span class="av-opt" data-av="🐰" onclick="pickEpAv(this)">🐰</span>
+      <span class="av-opt" data-av="🦁" onclick="pickEpAv(this)">🦁</span>
+      <span class="av-opt" data-av="🐧" onclick="pickEpAv(this)">🐧</span>
+      <span class="av-opt" data-av="🐻" onclick="pickEpAv(this)">🐻</span>
+      <span class="av-opt" data-av="🦋" onclick="pickEpAv(this)">🦋</span>
+      <span class="av-opt" data-av="🐯" onclick="pickEpAv(this)">🐯</span>
+      <span class="av-opt" data-av="🐮" onclick="pickEpAv(this)">🐮</span>
+    </div>
+    <button class="btn btn-main btn-block" style="margin-top:16px;" onclick="saveProfile()">Save Changes</button>
+  </div>
+</div>
+<!-- Notif settings -->
+<div id="modal-notif-settings" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal(this)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔔 Notification Settings</div>
+    <div class="toggle-row"><span class="toggle-label">Card opened notifications</span><button class="toggle on" id="ns-opened" onclick="toggleThis(this)"></button></div>
+    <div class="toggle-row"><span class="toggle-label">Smile received notifications</span><button class="toggle on" id="ns-smile" onclick="toggleThis(this)"></button></div>
+    <div class="toggle-row"><span class="toggle-label">New message notifications</span><button class="toggle on" id="ns-msg" onclick="toggleThis(this)"></button></div>
+    <div class="toggle-row"><span class="toggle-label">In-app notification sounds</span><button class="toggle" id="ns-sound" onclick="toggleThis(this)"></button></div>
+    <button class="btn btn-main btn-block" style="margin-top:18px;" onclick="closeModal(document.getElementById('modal-notif-settings'))">Done ✓</button>
+  </div>
+</div>
+<!-- Privacy -->
+<div id="modal-privacy" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal(this)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔒 Privacy & Links</div>
+    <div class="toggle-row"><span class="toggle-label">Card links work without login</span><button class="toggle on" id="priv-noauth" onclick="toggleThis(this)"></button></div>
+    <div class="toggle-row"><span class="toggle-label">Show "Made with Sorry Kitty" footer</span><button class="toggle on" id="priv-footer" onclick="toggleThis(this)"></button></div>
+    <div class="toggle-row"><span class="toggle-label">Allow recipient to reply via chat</span><button class="toggle" id="priv-reply" onclick="toggleThis(this)"></button></div>
+    <button class="btn btn-main btn-block" style="margin-top:18px;" onclick="closeModal(document.getElementById('modal-privacy'))">Done ✓</button>
+  </div>
+</div>
+<!-- Change password -->
+<div id="modal-change-pass" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal(this)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔑 Change Password</div>
+    <label>Current Password</label>
+    <input type="password" id="cp-cur" placeholder="••••••••">
+    <label>New Password</label>
+    <input type="password" id="cp-new" placeholder="min 6 characters">
+    <label>Confirm New Password</label>
+    <input type="password" id="cp-conf" placeholder="repeat new password">
+    <button class="btn btn-main btn-block" style="margin-top:16px;" onclick="changePassword()">Update Password</button>
+    <span class="err" id="cp-err" style="display:none;"></span>
+    <span class="succ" id="cp-ok" style="display:none;"></span>
+  </div>
+</div>
+
