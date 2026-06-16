@@ -256,12 +256,13 @@ async def create_card(body: Dict[str, Any]):
 @api.patch("/cards/{card_id}")
 async def update_card(card_id: str, body: Dict[str, Any]):
     user_id = body.pop("user_id", None)
-    if user_id:
-        existing = await sb_request(
-            "GET", "cards", params={"id": f"eq.{card_id}", "select": "owner_id"}
-        )
-        if not existing or existing[0]["owner_id"] != user_id:
-            return {"error": "Unauthorized"}
+    if not user_id:
+        return {"error": "Unauthorized"}
+    existing = await sb_request(
+        "GET", "cards", params={"id": f"eq.{card_id}", "select": "owner_id"}
+    )
+    if not existing or existing[0]["owner_id"] != user_id:
+        return {"error": "Unauthorized"}
     row = await sb_request(
         "PATCH",
         "cards",
