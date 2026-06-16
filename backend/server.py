@@ -365,6 +365,30 @@ async def list_chats(card_id: str):
     return {"success": True, "messages": rows or []}
 
 
+@api.get("/chats/participating")
+async def list_participating_cards(user_id: str):
+    """Cards the user has chatted on as a participant (i.e. shared cards they
+    interacted with but don't own). Used to populate the friend's Chat tab."""
+    chats = await sb_request(
+        "GET",
+        "chats",
+        params={"participant_id": f"eq.{user_id}", "select": "card_id"},
+    )
+    ids = sorted({c["card_id"] for c in (chats or []) if c.get("card_id")})
+    if not ids:
+        return {"success": True, "cards": []}
+    cards = await sb_request(
+        "GET",
+        "cards",
+        params={
+            "id": f"in.({','.join(ids)})",
+            "owner_id": f"neq.{user_id}",  # exclude cards the user owns
+            "order": "created_at.desc",
+        },
+    )
+    return {"success": True, "cards": cards or []}
+
+
 @api.post("/chats")
 async def send_chat(body: Dict[str, Any]):
     if not body.get("card_id") or not body.get("message"):

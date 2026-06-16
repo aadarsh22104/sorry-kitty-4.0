@@ -264,6 +264,100 @@ class TestChats:
         assert r.status_code == 200
         assert "required" in (r.json().get("error") or "").lower()
 
+    # ─── Iteration 3 — is_from_owner flag honoured, participating endpoint ───
+    def test_is_from_owner_flag_persists(self, session_client, demo_login):
+        """POST /api/chats must persist is_from_owner exactly as supplied
+        (no longer hard-coded). Both true and false must round-trip via GET."""
+        owner_id = demo_login["user"]["id"]
+        c = session_client.post(f"{API}/cards", json={
+            "owner_id": owner_id, "recipient": "TEST_FlagCard", "character": "🐰", "message": "x"
+        }).json()
+        card_id = c["card"]["id"]
+        try:
+            # Owner message
+            r1 = session_client.post(f"{API}/chats", json={
+                "card_id": card_id, "message": "owner-msg", "is_from_owner": True
+            })
+            assert r1.status_code == 200 and r1.json()["message"]["is_from_owner"] is True
+            # Friend message (is_from_owner=false)
+            r2 = session_client.post(f"{API}/chats", json={
+                "card_id": card_id, "message": "friend-msg", "is_from_owner": False
+            })
+            assert r2.status_code == 200 and r2.json()["message"]["is_from_owner"] is False
+
+            # Round-trip via GET
+            g = session_client.get(f"{API}/chats", params={"card_id": card_id}).json()
+            msgs = {m["message"]: m["is_from_owner"] for m in g["messages"]}
+            assert msgs.get("owner-msg") is True
+            assert msgs.get("friend-msg") is False
+        finally:
+            session_client.delete(f"{API}/cards/{card_id}", params={"user_id": owner_id})
+
+    def test_participating_endpoint_excludes_owned_includes_participated(self, session_client, demo_login):
+        """GET /api/chats/participating?user_id=<friend> returns cards the
+        friend has chatted on AS PARTICIPANT and does NOT own."""
+        owner_id = demo_login["user"]["id"]
+        # Owner creates a card
+        c = session_client.post(f"{API}/cards", json={
+            "owner_id": owner_id, "recipient": "TEST_Participating", "character": "🐼", "message": "hi"
+        }).json()
+        card_id = c["card"]["id"]
+        # Owner creates another card the friend will NOT chat on (control)
+        c2 = session_client.post(f"{API}/cards", json={
+            "owner_id": owner_id, "recipient": "TEST_NoChat", "character": "🐨", "message": "hey"
+        }).json()
+        card_id_no_chat = c2["card"]["id"]
+
+        # Create a fresh "friend" user
+        friend_email = f"friend_{uuid.uuid4().hex[:8]}@example.com"
+        friend = session_client.post(f"{API}/auth/signup", json={
+            "name": "Friend", "email": friend_email, "password": "secret123"
+        }).json()
+        friend_id = friend["user"]["id"]
+
+        try:
+            # Friend sends a chat message on card_id
+            r = session_client.post(f"{API}/chats", json={
+                "card_id": card_id, "participant_id": friend_id,
+                "message": "hi from friend", "is_from_owner": False
+            })
+            assert r.status_code == 200 and r.json().get("success") is True
+
+            # Participating endpoint for FRIEND should return card_id (not card_id_no_chat)
+            p = session_client.get(f"{API}/chats/participating", params={"user_id": friend_id})
+            assert p.status_code == 200, p.text
+            data = p.json()
+            assert data.get("success") is True
+            ids = [c["id"] for c in data["cards"]]
+            assert card_id in ids, f"participating card missing: {ids}"
+            assert card_id_no_chat not in ids, "control card (no chat) leaked into participating list"
+
+            # Participating endpoint for OWNER must NOT include card_id
+            # (owner owns it — should be excluded even though there are chats).
+            # Note: the demo owner hasn't posted on this card themselves, so
+            # they may not even appear via participant_id; but if they did,
+            # the owner_id=neq filter must still drop owned cards.
+            po = session_client.get(f"{API}/chats/participating", params={"user_id": owner_id})
+            assert po.status_code == 200
+            owner_ids = [c["id"] for c in po.json().get("cards", [])]
+            assert card_id not in owner_ids, "owner should not see their own card in /participating"
+            assert card_id_no_chat not in owner_ids
+        finally:
+            session_client.delete(f"{API}/cards/{card_id}", params={"user_id": owner_id})
+            session_client.delete(f"{API}/cards/{card_id_no_chat}", params={"user_id": owner_id})
+
+    def test_participating_empty_for_new_user(self, session_client):
+        """A brand new user with no chats returns success:true, cards:[]"""
+        email = f"nochats_{uuid.uuid4().hex[:8]}@example.com"
+        u = session_client.post(f"{API}/auth/signup", json={
+            "name": "NoChats", "email": email, "password": "secret123"
+        }).json()
+        r = session_client.get(f"{API}/chats/participating", params={"user_id": u["user"]["id"]})
+        assert r.status_code == 200
+        data = r.json()
+        assert data.get("success") is True
+        assert data.get("cards") == []
+
 
 # ─────────────────────────── NOTIFICATIONS ───────────────────────────
 class TestNotifications:

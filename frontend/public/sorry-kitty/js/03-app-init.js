@@ -11,7 +11,24 @@ async function initApp(){
   await renderCardsList();
   renderChats();
   await renderNotifs();
-  goTab('home');
+
+  // If the user just signed up/logged in because they clicked Chat on a
+  // shared card, jump straight into that card's chat instead of Home.
+  let pendingChat = null;
+  try { pendingChat = sessionStorage.getItem('sk_pending_chat'); } catch (e) {}
+  if (pendingChat) {
+    try { sessionStorage.removeItem('sk_pending_chat'); } catch (e) {}
+    // Clear the share hash so a refresh doesn't bounce them back into the
+    // public card viewer.
+    if (window.location.hash) {
+      try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) { window.location.hash = ''; }
+    }
+    goTab('chat');
+    setTimeout(()=>{ if (typeof openMomentWindow === 'function') openMomentWindow(pendingChat); }, 120);
+  } else {
+    goTab('home');
+  }
+
   // Demo notifications if none exist
   const notifs = await DB.getNotifs(CU.id);
   if(notifs.length===0){

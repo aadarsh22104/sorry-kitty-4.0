@@ -97,6 +97,11 @@ const DB = {
     return apiFetch('/cards?owner_id=' + encodeURIComponent(userId));
   },
 
+  async getParticipatingCards(userId) {
+    if (!userId) return { success: true, cards: [] };
+    return apiFetch('/chats/participating?user_id=' + encodeURIComponent(userId));
+  },
+
   async createCard(data) {
     return apiFetch('/cards', {
       method: 'POST',

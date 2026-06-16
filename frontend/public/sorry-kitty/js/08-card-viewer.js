@@ -235,7 +235,10 @@ function buildTreatRow(treats){
 }
 
 
-// Open chat directly with sender/recipient from final greeting screen
+// Open chat directly with sender/recipient from final greeting screen.
+// If the user isn't logged in we remember the card id so that, after they
+// sign up or log in, they're taken straight into that card's chat instead of
+// dropping onto the home tab.
 function kOpenChat(){
   const c = viewCardData;
   closeCardViewer();
@@ -247,6 +250,9 @@ function kOpenChat(){
       goTab('chat');
     }
   } else {
+    if (c && c.id) {
+      try { sessionStorage.setItem('sk_pending_chat', c.id); } catch (e) {}
+    }
     showPanel('panel-auth');
   }
 }

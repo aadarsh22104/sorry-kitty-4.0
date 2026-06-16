@@ -40,7 +40,7 @@ function tapMomentEmoji(btn){
 }
 
 // ── FIRE EMOJI — no text needed ──
-function fireEmojiReaction(emojiChar, holdClass, btn){
+async function fireEmojiReaction(emojiChar, holdClass, btn){
   if(momentBlocked) return;
 
   // Button flash
@@ -59,7 +59,21 @@ function fireEmojiReaction(emojiChar, holdClass, btn){
     applyCharReaction(emojiChar, '');
     applyMomentBg({bg: cfg.bg, glow: cfg.glow});
     spawnParticles([emojiChar, '✨', '🌸']);
-    simulateMomentReply(emojiChar, emojiChar, cfg);
+  }
+
+  // Persist the emoji as a real chat message so the other side sees it.
+  if(momentCardId && CU){
+    const isOwner = momentOwnerId === CU.id;
+    const saved = await DB.sendChatMessage({
+      card_id: momentCardId,
+      participant_id: CU.id,
+      message: emojiChar,
+      is_from_owner: isOwner,
+      emoji_reaction: emojiChar
+    });
+    if(saved && saved.success && saved.message){
+      momentSeenIds.add(saved.message.id);
+    }
   }
 }
 
@@ -318,39 +332,63 @@ function escapeHtml(t){const d=document.createElement('div');d.textContent=t;ret
 
 // ── RENDER MOMENT CARD LIST ──
 async function renderChats(){
-  const result = await DB.getCards(CU.id);
-  const cards = result.success ? result.cards : [];
+  if(!CU) return;
+  // Cards I own + cards I have chatted on (as a participant). Merged & deduped.
+  const ownedRes = await DB.getCards(CU.id);
+  const owned = ownedRes && ownedRes.success ? ownedRes.cards : [];
+  const partRes = await DB.getParticipatingCards(CU.id);
+  const participating = partRes && partRes.success ? partRes.cards : [];
+  const seen = new Set();
+  const cards = [];
+  for (const c of [...owned, ...participating]) {
+    if (seen.has(c.id)) continue;
+    seen.add(c.id);
+    cards.push(c);
+  }
   const list = document.getElementById('moment-card-list');
   if(!list) return;
   if(cards.length===0){
     list.innerHTML=`<div class="moment-empty"><span class="moment-empty-icon">💬</span><div class="moment-empty-title">No Moments Yet</div><div class="moment-empty-sub">Create a Sorry Card first,<br>then open a live moment with your recipient.</div><button class="btn btn-main" onclick="goTab('create')">Create a Card ✨</button></div>`;
     return;
   }
-  list.innerHTML=cards.map(c=>`
+  list.innerHTML=cards.map(c=>{
+    const otherName = (c.owner_id === CU.id) ? (c.recipient || '?') : (c.sender || c.recipient || 'Someone');
+    return `
     <div class="moment-card-entry" onclick="openMomentWindow('${c.id}')">
       <div class="moment-card-char">${charEmojis[c.character||'cat']||'🐱'}</div>
       <div class="moment-card-info">
-        <div class="moment-card-name">Moment with ${c.recipient||'?'}</div>
-        <div class="moment-card-tagline">${c.tagline||'Start a live emotional moment'}</div>
+        <div class="moment-card-name">Moment with ${otherName}</div>
+        <div class="moment-card-tagline">${c.tagline||'Tap to open the live moment'}</div>
         <div class="moment-card-status"><div class="moment-card-dot"></div><div class="moment-card-status-text">Ready</div></div>
       </div>
       <div class="moment-card-arrow">›</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ── OPEN / CLOSE ──
+let momentPollTimer = null;
+let momentSeenIds = new Set();
+let momentOwnerId = null; // owner of the currently open moment card
+
 async function openMomentWindow(cardId){
   const result = await DB.getCard(cardId);
   if(!result.success || !result.card) return;
   const card = result.card;
   momentCardId = cardId;
+  momentOwnerId = card.owner_id || null;
   momentBlocked = false;
   selectedMomentEmoji = null;
   heldEmojiActive = false;
   emojiBarExpanded = false;
+  momentSeenIds = new Set();
   document.querySelectorAll('.emoji-sel-btn').forEach(b=>b.classList.remove('selected','fired'));
   document.getElementById('emoji-selector')?.classList.remove('expanded');
-  document.getElementById('mpresence-name').textContent = card.recipient||'Someone special';
+  // Show "you" the recipient name if you ARE the card owner, otherwise the sender's name
+  const otherPartyLabel = (CU && CU.id === momentOwnerId)
+    ? (card.recipient || 'Someone special')
+    : (card.sender || card.recipient || 'Someone special');
+  document.getElementById('mpresence-name').textContent = otherPartyLabel;
   document.getElementById('mpresence-status').textContent = 'feeling your presence';
   // Build character
   const inner = document.getElementById('moment-char-inner');
@@ -371,13 +409,51 @@ async function openMomentWindow(cardId){
   buildMomentCardStrip(card);
   document.getElementById('moment-window').classList.add('open');
   setTimeout(()=>document.getElementById('moment-input')?.focus(), 300);
+
+  // Load existing chat history + start polling for new messages
+  await pollMomentMessages({initial:true});
+  if(momentPollTimer) clearInterval(momentPollTimer);
+  momentPollTimer = setInterval(()=>{ pollMomentMessages({initial:false}); }, 3000);
 }
+
+async function pollMomentMessages(opts){
+  if(!momentCardId) return;
+  const r = await DB.getChatMessages(momentCardId);
+  if(!r || !r.success) return;
+  const messages = r.messages || [];
+  if(opts && opts.initial){
+    // Mark everything we already have as seen, but render the most recent
+    // message from the OTHER side so the user has context on what was said.
+    messages.forEach(m=>momentSeenIds.add(m.id));
+    const lastFromOther = [...messages].reverse().find(m=>m.participant_id && m.participant_id !== (CU&&CU.id));
+    if(lastFromOther){
+      showMoment(lastFromOther.message, false);
+    }
+    return;
+  }
+  // Subsequent polls — show only NEW messages from the other side.
+  messages.forEach(m=>{
+    if(momentSeenIds.has(m.id)) return;
+    momentSeenIds.add(m.id);
+    const mine = CU && m.participant_id === CU.id;
+    if(mine) return; // we already showed this when we sent it
+    showMoment(m.message, false);
+    const e = m.emoji_reaction || detectEmojiFromText(m.message);
+    if(e) applyCharReaction(e, m.message);
+    const cfg = e ? EMOJI_HOLD_CONFIG[e] : null;
+    if(cfg){ applyMomentBg({bg:cfg.bg,glow:cfg.glow}); spawnParticles([e,'✨','🌸']); }
+  });
+}
+
 function closeMomentWindow(){
   document.getElementById('moment-window').classList.remove('open');
   momentCardId = null;
+  momentOwnerId = null;
+  momentSeenIds = new Set();
   clearTimeout(momentReactionTimer);
   clearTimeout(momentIdleTimer);
   clearTimeout(momentHeldTimer);
+  if(momentPollTimer){ clearInterval(momentPollTimer); momentPollTimer = null; }
 }
 
 // ── CARD STRIP ──
@@ -411,18 +487,22 @@ async function sendMoment(){
     spawnParticles(emo.particles||['🌸']);
   }
 
-  // Save message to Supabase
-  if(momentCardId){
-    await DB.sendChatMessage({
+  // Save the message to Supabase. is_from_owner is determined by whether
+  // the current user owns the card (true) or is a participant (false).
+  if(momentCardId && CU){
+    const isOwner = momentOwnerId === CU.id;
+    const saved = await DB.sendChatMessage({
       card_id: momentCardId,
       participant_id: CU.id,
       message: text,
-      is_from_owner: true,
+      is_from_owner: isOwner,
       emoji_reaction: reactionEmoji
     });
+    // Track our own message so the next poll doesn't double-render it
+    if(saved && saved.success && saved.message){
+      momentSeenIds.add(saved.message.id);
+    }
   }
-
-  simulateMomentReply(reactionEmoji, text, cfg);
 }
 function onMomentInputChange(){}
 
