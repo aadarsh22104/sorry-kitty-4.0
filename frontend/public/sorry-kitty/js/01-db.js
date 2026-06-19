@@ -5,9 +5,6 @@
 // ══════════════════════════════════════════════════════
 
 const API_BASE = (function () {
-  // The iframe lives on the same origin as the React shell, which
-  // proxies /api/* to the FastAPI backend. window.parent has the
-  // same URL so window.location.origin is the right base.
   return window.location.origin + '/api';
 })();
 
