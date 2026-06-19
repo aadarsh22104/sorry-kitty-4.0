@@ -31,6 +31,10 @@ SUPABASE_AUTH = f"{SUPABASE_URL}/auth/v1"
 app = FastAPI()
 api = APIRouter(prefix="/api")
 
+@app.get("/")
+async def health_check():
+    return {"status": "ok", "message": "Backend is running securely!"}
+
 logger = logging.getLogger("sorry-kitty")
 logging.basicConfig(level=logging.INFO)
 
